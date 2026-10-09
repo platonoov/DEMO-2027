@@ -1,0 +1,449 @@
+#>---------------------------------- Параметры конфигурации ----------------------------------<#
+
+#///::::::::::::::::::::::::::| Конфигурации ролей прав доступа |:::::::::::::::::::::::::::\\\#
+
+config_access_roles[Competitor_DE]='Pool.Audit VM.Audit VM.Console VM.PowerMgmt'
+
+#///%%%%%%%%%%%%%%%%%%% Конфигурации шаблонов настроек виртуальных машин %%%%%%%%%%%%%%%%%%%\\\#
+
+config_templates[Alt-JeOS]='
+
+templ_descr = Базовый шаблон для Альт p11 JeOS-systemd
+
+os_descr = Альт JeOS p11
+
+tags = alt_jeos_p11
+
+ostype = l26
+
+serial0 = socket
+
+tablet = 0
+
+agent = 1
+
+scsihw = virtio-scsi-single
+
+cpu = host
+
+cores = 1
+
+memory = 512
+
+boot_disk_0 = /mnt/Winchester/Alt-JeOS_11.qcow2
+
+'
+
+config_templates[Alt-Server_11.1]='
+
+templ_descr = Базовый шаблон для Альт Сервер 11.1
+
+os_descr = Альт Сервер 11.1
+
+tags = alt_server_11.1
+
+ostype = l26
+
+serial0 = socket
+
+agent = 1
+
+tablet = 0
+
+scsihw = virtio-scsi-single
+
+cpu = host
+
+cores = 1
+
+memory = 1024
+
+boot_disk_0 = /mnt/Winchester/Alt-SRW_11.1.qcow2
+
+'
+
+config_templates[Alt-Workstation_10.4]='
+
+templ_descr = Базовый шаблон для Альт Рабочая Станция 10.4
+
+os_descr = Альт Рабочая Станция 10.4
+
+tags = alt_workstation_10.4
+
+ostype = l26
+
+serial0 = socket
+
+agent = 1
+
+scsihw = virtio-scsi-single
+
+cpu = host
+
+cores = 2
+
+memory = 1536
+
+boot_disk_0 = /mnt/Winchester/Alt-WS_10.4.qcow2
+
+'
+
+config_templates[EcoRouterOS]='
+
+templ_descr = Базовый шаблон для EcoRouterOS
+
+os_descr = EcoRouterOS
+
+tags = ecorouter
+
+ostype = l26
+
+machine = pc-i440fx-7.0
+
+cpu = host
+
+cores = 2
+
+cpulimit = 1
+
+cpuunits = 75
+
+memory = 4096
+
+serial0 = socket
+
+tablet = 0
+
+disk_type = ide
+
+netifs_type = vmxnet3
+
+netifs_mac = 1C:87:76:40
+
+network_0 = { bridge=inet, state=down }
+
+boot_disk_0 = /mnt/Winchester/EcoRouter.qcow2
+
+'
+
+config_templates[Ideco-NGFW]='
+
+templ_descr = Базовый шаблон для Ideco NGFW
+
+os_descr = Ideco-NGFW
+
+tags = ideco-ngfw
+
+ostype = l26
+
+serial0 = socket
+
+bios = ovmf
+
+agent = 1
+
+tablet = 0
+
+scsihw = virtio-scsi-single
+
+cpu = host
+
+cores = 2
+
+memory = 7168
+
+boot_disk_0 = boot_disk_0 = /mnt/Winchester/ideco-NGFW.qcow2
+
+'
+
+#///=========================== Конфигурация варианта установки ===========================\\\#
+
+config_stand_1_var[stand_config]='
+
+description = Базовый стенд демэкзамена КОД 09.02.06-2027. Модуль № 1
+
+group_display_desc = Стенды демэкзамена 09.02.06 Сетевое и системное администрирование. Модуль 1
+
+pool_name = DE_09.02.06-2027_stand_A-{0}
+
+pool_desc = Стенд участника демэкзамена "Сетевое и системное администрирование". Стенд A-{0}
+
+pool_access_role = Competitor_DE
+
+access_user_name = Student-A{0}
+
+access_user_desc = Учетная запись участника демэкзамена A-{0}
+
+'
+
+config_stand_1_var[vm_1]='
+
+name = ISP
+
+config_template = Alt-JeOS
+
+startup = order=1,up=8,down=30
+
+firewall_opt = { enable=1, dhcp=1 }
+
+network_0 = { bridge=inet, firewall=1 }
+
+network_1 = : ISP-HQ
+
+network_2 = : ISP-BR
+
+'
+
+config_stand_1_var[vm_2]='
+
+name = HQ-RTR
+
+config_template = EcoRouterOS
+
+startup = order=2,up=8,down=0
+
+network_1 = : ISP-HQ
+
+network_2 = : HQ-Net
+
+'
+
+config_stand_1_var[vm_3]='
+
+name = HQ-SW
+
+config_template = Ideco-NGFW
+
+startup = order=3,up=8,down=30
+
+network_1 = : HQ-Net
+
+network_2 = {bridge=": SRV-Net", tag=100}
+
+network_3 = {bridge=": CLI-Net", tag=200}
+
+
+'
+
+config_stand_1_var[vm_4]='
+
+name = HQ-SRV
+
+config_template = Alt-Server_10.1
+
+startup = order=4,up=8,down=30
+
+network_0 = {bridge=": SRV-Net", tag=100}
+
+'
+
+config_stand_1_var[vm_5]='
+
+name = HQ-CLI
+
+config_template = Alt-Workstation_10.1
+
+startup = order=5,up=8,down=30
+
+network_0 = {bridge=": CLI-Net", tag=200}
+
+'
+
+config_stand_1_var[vm_6]='
+
+name = BR-RTR
+
+config_template = EcoRouterOS
+
+startup = order=2,up=8,down=0
+
+network_1 = : ISP-BR
+
+network_2 = : BR-Net
+
+'
+
+config_stand_1_var[vm_7]='
+
+name = BR-SRV
+
+config_template = Alt-Server_10.1
+
+startup = order=3,up=8,down=30
+
+network_1 = : FW-Net
+
+network_2 = : BR-Net
+'
+
+config_stand_1_var[vm_8]='
+
+name = BR-SRV
+
+config_template = Alt-Server_10.1
+
+startup = order=4,up=8,down=30
+
+network_0 = : BR-Net
+
+'
+
+#///=========================== Конфигурация варианта установки ===========================\\\#
+
+config_stand_2_var[stand_config]='
+
+description = Базовый стенд демэкзамена КОД 09.02.06-2027. Модуль № 2
+
+group_display_desc = Стенды демэкзамена 09.02.06 Сетевое и системное администрирование. Модуль 2
+
+pool_name = DE_09.02.06-2027_stand_B-{0}
+
+pool_desc = Стенд участника демэкзамена "Сетевое и системное администрирование". Стенд B-{0}
+
+pool_access_role = Competitor_DE
+
+access_user_name = Student-B{0}
+
+access_user_desc = Учетная запись участника демэкзамена B-{0}
+
+'
+
+config_stand_2_var[vm_1]='
+
+name = ISP
+
+config_template = Alt-JeOS
+
+startup = order=1,up=8,down=30
+
+firewall_opt = { enable=1, dhcp=1 }
+
+network_1 = { bridge=inet, firewall=1 }
+
+network_2 = : ISP-HQ
+
+network_3 = : ISP-BR
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/ISP_DE39-2025_M2.qcow2
+
+'
+
+config_stand_2_var[vm_2]='
+
+name = HQ-RTR
+
+config_template = EcoRouterOS
+
+startup = order=2,up=8,down=0
+
+network_1 = : ISP-HQ
+
+network_2 = : HQ-Net
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-RTR_DE39-2025_M2.qcow2
+
+'
+
+config_stand_2_var[vm_3]='
+
+name = HQ-SW
+
+config_template = Alt-JeOS
+
+startup = order=3,up=8,down=0
+
+network_1 = : HQ-Net
+
+network_2 = : {bridge=": SRV-Net", tag=100}
+
+network_3 = : {bridge=": CLI-Net", tag=200}
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-SW_DE39-2025_M2.qcow2
+
+'
+
+config_stand_2_var[vm_4]='
+
+name = HQ-SRV
+
+config_template = Alt-Server_10.1
+
+startup = order=4,up=8,down=30
+
+network_1 = {bridge=": SRV-Net", tag=100}
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-SRV_DE39-2025_M2.qcow2
+
+memory = 1536
+
+disk_1 = 1 GB
+
+disk_2 = 1 GB
+
+disk_3 = 1 GB
+
+'
+
+config_stand_2_var[vm_5]='
+
+name = HQ-CLI
+
+config_template = Alt-Workstation_10.1
+
+startup = order=5,up=8,down=30
+
+network_1 = {bridge=": CLI-Net", tag=200}
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-CLI_DE39-2025_M2.qcow2
+
+'
+
+config_stand_2_var[vm_6]='
+
+name = BR-RTR
+
+config_template = EcoRouterOS
+
+startup = order=2,up=8,down=0
+
+network_1 = : ISP-BR
+
+network_2 = : FW-Net
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/BR-RTR_DE39-2025_M2.qcow2
+
+'
+
+config_stand_2_var[vm_7]='
+
+name = BR-FW
+
+config_template = Ideco-NGFW
+
+startup = order=3,up=8,down=0
+
+network_1 = : FW-Net
+
+network_2 = : BR-Net
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/BR-FW_DE39-2025_M2.qcow2
+
+'
+
+config_stand_2_var[vm_8]='
+
+name = BR-SRV
+
+config_template = Alt-Server_10.1
+
+startup = order=4,up=8,down=30
+
+network_1 = : BR-Net
+
+memory = 2048
+
+boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/BR-SRV_DE39-2025_M2.qcow2
+
+'
+
+#<------------------------------ Конец параметров конфигурации ------------------------------->#
