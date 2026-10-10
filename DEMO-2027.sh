@@ -7,6 +7,7 @@ import os, sys, re, json, shlex, shutil, subprocess, urllib.parse, urllib.reques
 from pathlib import Path
 
 APP = 'DEMO-2027'
+CONF_URL = 'https://raw.githubusercontent.com/platonoov/DEMO-2027/main/conf.txt'
 STATE = Path('/var/lib/demo-2027')
 STANDS = STATE / 'stands'
 NETDIR = Path('/etc/network/interfaces.d')
@@ -349,12 +350,19 @@ def create_stand(module, num, external, storage, templates, mods):
         role_privs='Pool.Audit VM.Audit VM.Console VM.PowerMgmt'
         ensure_role(role,role_privs)
         created_user=False
+        generated_password=None
         if not pve_user_exists(user):
-            password=getpass.getpass(f'Пароль для новой учётной записи {user} (ввод скрыт): ')
-            if not password: raise Failure('Пустой пароль не допускается для новой учётной записи.')
-            run(['pveum','user','add',user,'--comment',standcfg.get('access_user_desc','').replace('{0}',str(num)),'--password',password])
+            # Proxmox VE rejects passwords shorter than 8 characters. Generate 12
+            # chars from uppercase letters and digits; never persist the secret in the manifest.
+            alphabet=string.ascii_uppercase + string.digits
+            generated_password=''.join(secrets.choice(alphabet) for _ in range(12))
+            run(['pveum','user','add',user,'--comment',standcfg.get('access_user_desc','').replace('{0}',str(num)),
+                 '--password',generated_password,'--enable','1'])
             created_user=True
+        else:
+            print(f'Пользователь {user} уже существует; пароль не изменялся.')
         manifest['user_created']=created_user
+        manifest['role']=standcfg.get('pool_access_role','Competitor_DE')
         manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
         cache=STATE/'images'
         for ix,(n,v,tpl,specs,img) in enumerate(vmblocks):
@@ -372,6 +380,7 @@ def create_stand(module, num, external, storage, templates, mods):
         manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
         print(f'\nГотово: стенд {sid} создан. Пул: {pool}; пользователь: {user}; ВМ: {len(vmblocks)}.')
         print('Внутренние мосты сохраняются в конфигурации:',netfile)
+        return {'sid':sid,'user':user,'password':generated_password,'vms':len(vmblocks),'status':'complete'}
     except Exception as e:
         manifest['status']='partial/error'; manifest['last_error']=str(e)
         manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
@@ -487,8 +496,29 @@ def validate_conf(templates,mods):
 def main():
     need_root()
     print('=== DEMO-2027 | менеджер стендов Proxmox VE ===')
-    conf=input('Путь к conf.txt [/root/conf.txt]: ').strip() or '/root/conf.txt'
-    _,templates,mods=read_conf(conf)
+    conf=input('Путь к локальному conf.txt (Enter — загрузить из GitHub): ').strip()
+    if conf:
+        conf_path=Path(conf).expanduser()
+    else:
+        # Download fresh configuration from the same branch as this script.
+        # Keep a local copy for audit/recovery, but do not execute it as shell.
+        conf_path=STATE/'conf.txt'
+        try:
+            STATE.mkdir(parents=True,exist_ok=True)
+            req=urllib.request.Request(CONF_URL,headers={'User-Agent':'DEMO-2027/1.0'})
+            with urllib.request.urlopen(req,timeout=20) as response:
+                payload=response.read()
+            if not payload.strip(): raise Failure('GitHub вернул пустой conf.txt.')
+            conf_path.write_bytes(payload)
+            print(f'Конфигурация загружена из GitHub: {CONF_URL}')
+        except Exception as e:
+            fallback=Path('/root/conf.txt')
+            if fallback.is_file():
+                print(f'Не удалось скачать conf.txt из GitHub ({e}); использую {fallback}.')
+                conf_path=fallback
+            else:
+                raise Failure(f'Не удалось загрузить {CONF_URL}: {e}. Укажи путь к локальному conf.txt.')
+    _,templates,mods=read_conf(conf_path)
     while True:
         print('\n1. Создать стенды\n2. Список стендов\n3. Удалить стенд\n4. Проверить conf.txt\n0. Выход')
         choice=input('Выбор: ').strip()
@@ -513,11 +543,20 @@ def main():
                 start=input('Номер первого стенда (1–99): ').strip()
                 if not start.isdigit() or not 1<=int(start)<=99 or int(start)+count-1>99: print('Диапазон номеров должен укладываться в 1–99.'); continue
                 if not yesno(f'Создать {count} стенд(ов) модуля {module}, внешний мост {external}, storage {storage}?',False): continue
+                credentials=[]
                 for num in range(int(start),int(start)+count):
-                    try: create_stand(module,num,external,storage,templates,mods)
+                    try:
+                        result=create_stand(module,num,external,storage,templates,mods)
+                        if result and result.get('password'):
+                            credentials.append((result['sid'],result['user'],result['password']))
                     except Exception as e:
                         print(f'Стенд {num} не завершён: {e}')
                         if not yesno('Продолжить создание следующих стендов?',False): break
+                if credentials:
+                    print('\n=== СОХРАНИ ЭТИ УЧЁТНЫЕ ДАННЫЕ СЕЙЧАС ===')
+                    print('Пароли показаны только для новых пользователей и не записываются в манифест.')
+                    for sid,user,password in credentials:
+                        print(f'{sid} | {user} | {password}')
             elif choice=='2': list_stands()
             elif choice=='3': remove_stand()
             elif choice=='4':
@@ -540,3 +579,4 @@ except Failure as e:
 except KeyboardInterrupt:
     print('\nОстановлено пользователем.'); sys.exit(130)
 PY
+
