@@ -58,7 +58,7 @@ cores = 1
 
 memory = 1024
 
-boot_disk_0 = /mnt/Winchester/import/Alt-SRW_11.1.qcow2
+boot_disk_0 = /mnt/Winchester/import/Alt-SRV_11.1.qcow2
 
 '
 
