@@ -212,7 +212,7 @@ config_stand_1_var[vm_3]='
 
 name = HQ-SW
 
-config_template = Ideco-NGFW
+config_template = Alt-JeOs
 
 startup = order=3,up=8,down=30
 
@@ -229,7 +229,7 @@ config_stand_1_var[vm_4]='
 
 name = HQ-SRV
 
-config_template = Alt-Server_10.1
+config_template = Alt-Server_11.1
 
 startup = order=4,up=8,down=30
 
@@ -241,7 +241,7 @@ config_stand_1_var[vm_5]='
 
 name = HQ-CLI
 
-config_template = Alt-Workstation_10.1
+config_template = Alt-Workstation_10.4
 
 startup = order=5,up=8,down=30
 
@@ -265,9 +265,9 @@ network_2 = : BR-Net
 
 config_stand_1_var[vm_7]='
 
-name = BR-SRV
+name = BR-FW
 
-config_template = Alt-Server_10.1
+config_template = Ideco-NGFW
 
 startup = order=3,up=8,down=30
 
@@ -280,7 +280,7 @@ config_stand_1_var[vm_8]='
 
 name = BR-SRV
 
-config_template = Alt-Server_10.1
+config_template = Alt-Server_11.1
 
 startup = order=4,up=8,down=30
 
