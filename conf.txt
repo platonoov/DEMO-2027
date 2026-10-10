@@ -162,7 +162,7 @@ config_stand_1_var[stand_config]='
 
 description = Базовый стенд демэкзамена КОД 09.02.06-2027. Модуль № 1
 
-group_display_desc = Стенды демэкзамена 09.02.06 Сетевое и системное администрирование. Модуль 1
+group_display_desc = Стенды демэкзамена 09.02.06 Сетевое и системное администрирование. Модуль 1. Классический вариант.
 
 pool_name = DE_09.02.06-2027_stand_A-{0}
 
@@ -182,7 +182,7 @@ name = ISP
 
 config_template = Alt-JeOS
 
-startup = order=1,up=8,down=30
+startup = order=1,up=7,down=30
 
 firewall_opt = { enable=1, dhcp=1 }
 
@@ -200,7 +200,7 @@ name = HQ-RTR
 
 config_template = EcoRouterOS
 
-startup = order=2,up=8,down=0
+startup = order=2,up=7,down=0
 
 network_1 = : ISP-HQ
 
@@ -210,74 +210,62 @@ network_2 = : HQ-Net
 
 config_stand_1_var[vm_3]='
 
-name = HQ-SW
+name = HQ-SRV
 
-config_template = Alt-JeOS
+config_template = Alt-Server_11.1
 
-startup = order=3,up=8,down=30
+startup = order=3,up=7,down=30
 
-network_1 = : HQ-Net
+network_0 = {bridge=": HQ-Net", tag=100}
 
 '
 
 config_stand_1_var[vm_4]='
 
-name = HQ-SRV
+name = HQ-CLI
 
-config_template = Alt-Server_11.1
+config_template = Alt-Workstation_10.4
 
-startup = order=4,up=8,down=30
+startup = order=4,up=7,down=30
 
-network_0 = : HQ-Net
+network_0 = {bridge=": HQ-Net", tag=200}
 
 '
 
 config_stand_1_var[vm_5]='
 
-name = HQ-CLI
+name = BR-RTR
 
-config_template = Alt-Workstation_10.4
+config_template = EcoRouterOS
 
-startup = order=5,up=8,down=30
+startup = order=2,up=7,down=0
 
-network_0 = : HQ-Net
+network_1 = : ISP-BR
+
+network_2 = : FW-Net
 
 '
 
 config_stand_1_var[vm_6]='
 
-name = BR-RTR
-
-config_template = EcoRouterOS
-
-startup = order=2,up=8,down=0
-
-network_1 = : ISP-BR
-
-network_2 = : BR-Net
-
-'
-
-config_stand_1_var[vm_7]='
-
 name = BR-FW
 
 config_template = Ideco-NGFW
 
-startup = order=3,up=8,down=30
+startup = order=3,up=7,down=30
 
 network_1 = : FW-Net
 
 network_2 = : BR-Net
 '
 
-config_stand_1_var[vm_8]='
+config_stand_1_var[vm_7]='
 
 name = BR-SRV
 
 config_template = Alt-Server_11.1
 
-startup = order=4,up=8,down=30
+startup = order=4,up=7,down=30
 
 network_0 = : BR-Net
 
@@ -329,7 +317,7 @@ name = HQ-RTR
 
 config_template = EcoRouterOS
 
-startup = order=2,up=8,down=0
+startup = order=2,up=7,down=0
 
 network_1 = : ISP-HQ
 
@@ -341,27 +329,13 @@ boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-RTR_DE39-2025_M2.qcow2
 
 config_stand_2_var[vm_3]='
 
-name = HQ-SW
-
-config_template = Alt-JeOS
-
-startup = order=3,up=8,down=0
-
-network_1 = : HQ-Net
-
-boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-SW_DE39-2025_M2.qcow2
-
-'
-
-config_stand_2_var[vm_4]='
-
 name = HQ-SRV
 
 config_template = Alt-Server_11.1
 
-startup = order=4,up=8,down=30
+startup = order=3,up=7,down=30
 
-network_1 = : HQ-Net
+network_1 = {bridge=": HQ-Net", tag=100}
 
 boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-SRV_DE39-2025_M2.qcow2
 
@@ -375,27 +349,27 @@ disk_3 = 1 GB
 
 '
 
-config_stand_2_var[vm_5]='
+config_stand_2_var[vm_4]='
 
 name = HQ-CLI
 
 config_template = Alt-Workstation_10.4
 
-startup = order=5,up=8,down=30
+startup = order=4,up=7,down=30
 
-network_1 = : HQ-Net
+network_1 = {bridge=": HQ-Net", tag=200}
 
 boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-CLI_DE39-2025_M2.qcow2
 
 '
 
-config_stand_2_var[vm_6]='
+config_stand_2_var[vm_5]='
 
 name = BR-RTR
 
 config_template = EcoRouterOS
 
-startup = order=2,up=8,down=0
+startup = order=2,up=7,down=0
 
 network_1 = : ISP-BR
 
@@ -405,13 +379,13 @@ boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/BR-RTR_DE39-2025_M2.qcow2
 
 '
 
-config_stand_2_var[vm_7]='
+config_stand_2_var[vm_6]='
 
 name = BR-FW
 
 config_template = Ideco-NGFW
 
-startup = order=3,up=8,down=0
+startup = order=3,up=7,down=0
 
 network_1 = : FW-Net
 
@@ -421,13 +395,13 @@ boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/BR-FW_DE39-2025_M2.qcow2
 
 '
 
-config_stand_2_var[vm_8]='
+config_stand_2_var[vm_7]='
 
 name = BR-SRV
 
 config_template = Alt-Server_11.1
 
-startup = order=4,up=8,down=30
+startup = order=4,up=7,down=30
 
 network_1 = : BR-Net
 
