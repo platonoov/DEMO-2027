@@ -152,7 +152,7 @@ cores = 2
 
 memory = 7168
 
-boot_disk_0 = boot_disk_0 = /mnt/Winchester/ideco-NGFW.qcow2
+boot_disk_0 = /mnt/Winchester/ideco-NGFW.qcow2
 
 '
 
@@ -212,7 +212,7 @@ config_stand_1_var[vm_3]='
 
 name = HQ-SW
 
-config_template = Alt-JeOs
+config_template = Alt-JeOS
 
 startup = order=3,up=8,down=30
 
@@ -354,9 +354,9 @@ startup = order=3,up=8,down=0
 
 network_1 = : HQ-Net
 
-network_2 = : {bridge=": SRV-Net", tag=100}
+network_2 = {bridge=": SRV-Net", tag=100}
 
-network_3 = : {bridge=": CLI-Net", tag=200}
+network_3 = {bridge=": CLI-Net", tag=200}
 
 boot_disk_0 = https://disk.yandex.ru/d/-k7f2O46zCXaCQ/HQ-SW_DE39-2025_M2.qcow2
 
@@ -366,7 +366,7 @@ config_stand_2_var[vm_4]='
 
 name = HQ-SRV
 
-config_template = Alt-Server_10.1
+config_template = Alt-Server_11.1
 
 startup = order=4,up=8,down=30
 
@@ -388,7 +388,7 @@ config_stand_2_var[vm_5]='
 
 name = HQ-CLI
 
-config_template = Alt-Workstation_10.1
+config_template = Alt-Workstation_10.4
 
 startup = order=5,up=8,down=30
 
@@ -434,7 +434,7 @@ config_stand_2_var[vm_8]='
 
 name = BR-SRV
 
-config_template = Alt-Server_10.1
+config_template = Alt-Server_11.1
 
 startup = order=4,up=8,down=30
 
