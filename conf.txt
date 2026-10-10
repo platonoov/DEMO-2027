@@ -30,7 +30,7 @@ cores = 1
 
 memory = 512
 
-boot_disk_0 = /mnt/Winchester/Alt-JeOS_11.qcow2
+boot_disk_0 = /mnt/Winchester/import/Alt-JeOS_11.qcow2
 
 '
 
@@ -58,7 +58,7 @@ cores = 1
 
 memory = 1024
 
-boot_disk_0 = /mnt/Winchester/Alt-SRW_11.1.qcow2
+boot_disk_0 = /mnt/Winchester/import/Alt-SRW_11.1.qcow2
 
 '
 
@@ -84,7 +84,7 @@ cores = 2
 
 memory = 1536
 
-boot_disk_0 = /mnt/Winchester/Alt-WS_10.4.qcow2
+boot_disk_0 = /mnt/Winchester/import/Alt-WS_10.4.qcow2
 
 '
 
@@ -122,7 +122,7 @@ netifs_mac = 1C:87:76:40
 
 network_0 = { bridge=inet, state=down }
 
-boot_disk_0 = /mnt/Winchester/EcoRouter.qcow2
+boot_disk_0 = /mnt/Winchester/import/EcoRouter.qcow2
 
 '
 
@@ -152,7 +152,7 @@ cores = 2
 
 memory = 7168
 
-boot_disk_0 = /mnt/Winchester/ideco-NGFW.qcow2
+boot_disk_0 = /mnt/Winchester/import/ideco-NGFW.qcow2
 
 '
 
