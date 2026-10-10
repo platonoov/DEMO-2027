@@ -3,7 +3,7 @@
 # Persistent isolated Linux bridges, per-stand VMs/pools/users, ownership manifest.
 set -Eeuo pipefail
 exec python3 - "$@" <<'PY'
-import os, sys, re, json, shlex, shutil, subprocess, urllib.parse, urllib.request, getpass, secrets, string, time
+import os, sys, re, json, shlex, shutil, subprocess, urllib.parse, urllib.request, getpass, secrets, string, time, tempfile, atexit
 from pathlib import Path
 
 APP = 'DEMO-2027'
@@ -496,33 +496,26 @@ def validate_conf(templates,mods):
 def main():
     need_root()
     print('=== DEMO-2027 | менеджер стендов Proxmox VE ===')
-    conf=input('Путь к локальному conf.txt (Enter — загрузить из GitHub): ').strip()
-    if conf:
-        conf_path=Path(conf).expanduser()
-    else:
-        # Download fresh configuration from the same branch as this script.
-        # Keep a local copy for audit/recovery, but do not execute it as shell.
-        conf_path=STATE/'conf.txt'
-        try:
-            STATE.mkdir(parents=True,exist_ok=True)
-            req=urllib.request.Request(CONF_URL,headers={'User-Agent':'DEMO-2027/1.0'})
-            with urllib.request.urlopen(req,timeout=20) as response:
-                payload=response.read()
-            if not payload.strip(): raise Failure('GitHub вернул пустой conf.txt.')
-            conf_path.write_bytes(payload)
-            print(f'Конфигурация загружена из GitHub: {CONF_URL}')
-        except Exception as e:
-            fallback=Path('/root/conf.txt')
-            if fallback.is_file():
-                print(f'Не удалось скачать conf.txt из GitHub ({e}); использую {fallback}.')
-                conf_path=fallback
-            else:
-                raise Failure(f'Не удалось загрузить {CONF_URL}: {e}. Укажи путь к локальному conf.txt.')
+    # conf.txt остаётся на GitHub. Загружаем его во временный файл только
+    # на время работы процесса и удаляем при выходе; локальная копия не нужна.
+    try:
+        req=urllib.request.Request(CONF_URL,headers={'User-Agent':'DEMO-2027/1.0'})
+        with urllib.request.urlopen(req,timeout=25) as response:
+            payload=response.read()
+    except Exception as e:
+        raise Failure(f'Не удалось загрузить conf.txt с GitHub: {e}\nURL: {CONF_URL}')
+    if not payload.strip(): raise Failure('GitHub вернул пустой conf.txt.')
+    fd, temp_name = tempfile.mkstemp(prefix='demo-2027-conf-', suffix='.txt')
+    os.close(fd)
+    conf_path=Path(temp_name)
+    conf_path.write_bytes(payload)
+    atexit.register(lambda: conf_path.unlink(missing_ok=True))
+    print(f'Конфигурация загружена с GitHub: {CONF_URL}')
     _,templates,mods=read_conf(conf_path)
     while True:
-        print('\n1. Создать стенды\n2. Список стендов\n3. Удалить стенд\n4. Проверить conf.txt\n0. Выход')
+        print('\n1. Создать стенды\n2. Список стендов\n3. Выход\n4. Удалить стенд\n5. Проверить conf.txt')
         choice=input('Выбор: ').strip()
-        if choice=='0': return
+        if choice=='3': return
         try:
             if choice=='1':
                 mod=input('Модуль (1 или 2): ').strip()
@@ -558,8 +551,8 @@ def main():
                     for sid,user,password in credentials:
                         print(f'{sid} | {user} | {password}')
             elif choice=='2': list_stands()
-            elif choice=='3': remove_stand()
-            elif choice=='4':
+            elif choice=='4': remove_stand()
+            elif choice=='5':
                 issues=validate_conf(templates,mods)
                 if not issues: print('Базовая проверка пройдена: шаблоны, сети и пути локальных образов выглядят корректно.')
                 else:
@@ -579,4 +572,3 @@ except Failure as e:
 except KeyboardInterrupt:
     print('\nОстановлено пользователем.'); sys.exit(130)
 PY
-
