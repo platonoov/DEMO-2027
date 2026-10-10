@@ -2,7 +2,7 @@
 # DEMO-2027.sh — Proxmox VE stand manager
 # Persistent isolated Linux bridges, per-stand VMs/pools/users, ownership manifest.
 set -Eeuo pipefail
-exec python3 - "$@" <<'PY'
+python3 - /dev/tty <<'PY'
 import os, sys, re, json, shlex, shutil, subprocess, urllib.parse, urllib.request, getpass, secrets, string, time, tempfile, atexit
 from pathlib import Path
 
