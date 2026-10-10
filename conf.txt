@@ -152,7 +152,7 @@ cores = 2
 
 memory = 7168
 
-boot_disk_0 = /mnt/Winchester/import/ideco-NGFW.qcow2
+boot_disk_0 = /mnt/Winchester/import/Ideco-NGFW.qcow2
 
 '
 
